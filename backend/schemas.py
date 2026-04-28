@@ -1,7 +1,28 @@
 from pydantic import BaseModel, ConfigDict, field_validator
 from typing import Optional, List
 from datetime import datetime
+from enum import Enum
 import re
+
+
+kelurahan_jogja = [
+    "Baciro", "Bausasran", "Bener", "Brontokusuman", "Bumijo", 
+    "Cokrodiningratan", "Demangan", "Gedongkiwo", "Giwangan", "Gowongan", 
+    "Gunungketur", "Kadipaten", "Karangwaru", "Keparakan", "Klitren", 
+    "Kotabaru", "Kricak", "Mantrijeron", "Muja Muju", "Ngampilan", 
+    "Ngupasan", "Notoprajan", "Pakuncen", "Pandeyan", "Panembahan", 
+    "Patangpuluhan", "Patehan", "Prawirodirjan", "Prenggan", "Pringgokusuman", 
+    "Purbayan", "Purwokinanti", "Rejowinangun", "Semaki", "Sorosutan", 
+    "Sosromenduran", "Suryatmajan", "Suryodiningratan", "Tahunan", "Tegalpanggung", 
+    "Tegalrejo", "Terban", "Warungboto", "Wirobrajan", "Wirogunan"
+]
+
+KelurahanJogja = Enum(
+    "KelurahanJogja", 
+    {k.upper().replace(" ", "_"): k for k in list_kelurahan}, 
+    type=str
+)
+
 # --- User Schemas ---
 class UserBase(BaseModel):
     username: str

@@ -9,7 +9,15 @@ class User(Base):
     username = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     role = Column(String) # 'admin' or 'kelurahan'
-    kelurahan_name = Column(String, nullable=True) # for 'kelurahan' role
+    accessible_kelurahans = relationship("UserKelurahan", back_populates="owner")
+
+class UserKelurahan(Base):
+    __tablename__ = "user_kelurahans"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    kelurahan_name = Column(String, index=True)
+    
+    owner = relationship("User", back_populates="accessible_kelurahans")
 
 class Complaint(Base):
     __tablename__ = "complaints"
@@ -29,6 +37,7 @@ class Complaint(Base):
     admin_photo_url = Column(String, nullable=True) # Proof from admin
     priority_score = Column(Integer, default=0) # From our AI NLP 
     is_approved = Column(Boolean, default=False) # Approval from kelurahan user
+    category = Column(String)
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     user_id = Column(Integer, ForeignKey("users.id"))
