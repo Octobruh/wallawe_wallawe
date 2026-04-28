@@ -1,7 +1,8 @@
 from fastapi import FastAPI, Depends, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from . import models, schemas, database
+from . import models, schemas, database, auth
 from sqlalchemy import case, desc
 
 app = FastAPI(title="Wallawe API")
@@ -10,6 +11,18 @@ app = FastAPI(title="Wallawe API")
 @app.get("/")
 def read_root():
     return {"message": "Welcome to Wallawe API"}
+
+# Login endpoint
+
+@app.post("/token")
+def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
+    user = db.query(models.User).filter(models.User.username == form_data.username).first()
+    if not user or not auth.pwd_context.verify(form_data.password, user.hashed_password):
+        raise HTTPException(status_code=401, detail="Salah username atau password")
+    
+    # get token from auth.py
+    access_token = auth.create_access_token(data={"sub": user.username, "role": user.role})
+    return {"access_token": access_token, "token_type": "bearer"}
 
 # --- Complaints Endpoints ---
 
@@ -55,7 +68,14 @@ def read_schedules(day: Optional[str] = None, db: Session = Depends(database.get
     return query.order_by(day_order, models.Schedule.time).all()
 
 @app.post("/schedules/", response_model=schemas.Schedule)
-def add_schedule(schedule: schemas.ScheduleCreate, db: Session = Depends(database.get_db)):
+def add_schedule(
+    schedule: schemas.ScheduleCreate, 
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(auth.get_current_user) # Proteksi aktif
+):
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Hanya admin yang bisa menambah jadwal")
+        
     db_schedule = models.Schedule(**schedule.model_dump())
     db.add(db_schedule)
     db.commit()
@@ -63,7 +83,13 @@ def add_schedule(schedule: schemas.ScheduleCreate, db: Session = Depends(databas
     return db_schedule
 
 @app.delete("/schedules/{schedule_id}")
-def delete_schedule(schedule_id: int, db: Session = Depends(database.get_db)):
+def delete_schedule(
+    schedule_id: int, 
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(auth.get_current_user) # Tambahkan ini
+):
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Hanya admin yang bisa menghapus jadwal")
     db_schedule = db.query(models.Schedule).filter(models.Schedule.id == schedule_id).first()
     
     if not db_schedule:
