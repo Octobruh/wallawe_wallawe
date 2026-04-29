@@ -23,11 +23,20 @@ KelurahanJogja = Enum(
     type=str
 )
 
+class NamaHari(str, Enum):
+    SENIN = "Senin"
+    SELASA = "Selasa"
+    RABU = "Rabu"
+    KAMIS = "Kamis"
+    JUMAT = "Jumat"
+    SABTU = "Sabtu"
+    MINGGU = "Minggu"
+
 # --- User Schemas ---
 class UserBase(BaseModel):
     username: str
     role: str
-    kelurahan_name: Optional[str] = None
+    kelurahan_name: Optional[KelurahanJogja] = None
 
 class UserCreate(UserBase):
     password: str
@@ -38,7 +47,7 @@ class User(UserBase):
 
 # --- Complaint Schemas ---
 class ComplaintBase(BaseModel):
-    kelurahan: str
+    kelurahan: KelurahanJogja
     rt: int
     rw: int
     jalan: str
@@ -62,19 +71,11 @@ class Complaint(ComplaintBase):
 
 # --- Schedule Schemas ---
 class ScheduleBase(BaseModel):
-    day: str
+    day: NamaHari
     time: str
-    kelurahan_target: str
+    kelurahan_target: KelurahanJogja
 
 class ScheduleCreate(ScheduleBase):
-    @field_validator('day')
-    @classmethod
-    def validate_day(cls, v: str):
-        hari_valid = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
-        if v not in hari_valid:
-            raise ValueError(f'Hari tidak valid. Pilih antara: {", ".join(hari_valid)}')
-        return v
-
     @field_validator('time')
     @classmethod
     def validate_time(cls, v: str):

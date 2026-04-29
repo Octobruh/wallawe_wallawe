@@ -35,11 +35,11 @@ def create_complaint(complaint: schemas.ComplaintCreate, db: Session = Depends(d
     return db_complaint
 
 @app.get("/complaints/", response_model=List[schemas.Complaint])
-def read_complaints(kelurahan: Optional[str] = None, skip: int = 0, limit: int = 100, db: Session = Depends(database.get_db)):
+def read_complaints(kelurahan: Optional[schemas.KelurahanJogja] = None, skip: int = 0, limit: int = 100, db: Session = Depends(database.get_db)):
     query = db.query(models.Complaint)
     # If they want to sort based on the kelurahan
     if kelurahan:
-        query = query.filter(models.Complaint.kelurahan == kelurahan)
+        query = query.filter(models.Complaint.kelurahan == kelurahan.value)
     complaints = query.order_by(desc(models.Complaint.created_at))\
         .offset(skip)\
         .limit(limit)\
@@ -49,7 +49,7 @@ def read_complaints(kelurahan: Optional[str] = None, skip: int = 0, limit: int =
 # --- Schedules Endpoints ---
 
 @app.get("/schedules/", response_model=List[schemas.Schedule])
-def read_schedules(day: Optional[str] = None, db: Session = Depends(database.get_db)):
+def read_schedules(day: Optional[schemas.NamaHari] = None, db: Session = Depends(database.get_db)):
     day_order = case(
         {
             "Senin": 1,
@@ -64,7 +64,7 @@ def read_schedules(day: Optional[str] = None, db: Session = Depends(database.get
     )
     query = db.query(models.Schedule)
     if day:
-        query = query.filter(models.Schedule.day == day)
+        query = query.filter(models.Schedule.day == day.value)
     return query.order_by(day_order, models.Schedule.time).all()
 
 @app.post("/schedules/", response_model=schemas.Schedule)
