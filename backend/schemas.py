@@ -32,17 +32,27 @@ class NamaHari(str, Enum):
     SABTU = "Sabtu"
     MINGGU = "Minggu"
 
+class StatusComplaint(str, Enum):
+    PENDING = "pending"
+    PROCESSED = "processed"
+    REJECTED = "rejected"
+    SOLVED = "solved"
+
 # --- User Schemas ---
 class UserBase(BaseModel):
     username: str
     role: str
-    kelurahan_name: Optional[KelurahanJogja] = None
 
 class UserCreate(UserBase):
     password: str
 
+class UserKelurahanResponse(BaseModel):
+    kelurahan_name: str
+    model_config = ConfigDict(from_attributes=True)
+    
 class User(UserBase):
     id: int
+    accessible_kelurahans: List[UserKelurahanResponse] = []
     model_config = ConfigDict(from_attributes=True)
 
 # --- Complaint Schemas ---
@@ -54,6 +64,7 @@ class ComplaintBase(BaseModel):
     description_location: str
     complaint_text: str
     photo_url: Optional[str] = None
+    status: StatusComplaint = StatusComplaint.PENDING
 
 class ComplaintCreate(ComplaintBase):
     pass
@@ -68,6 +79,14 @@ class Complaint(ComplaintBase):
     user_id: Optional[int] = None
     
     model_config = ConfigDict(from_attributes=True)
+
+
+class ComplaintStatusUpdate(BaseModel):
+    is_approved: bool
+    status: StatusComplaint # pending, processed, rejected, solved
+
+class ComplaintSolve(BaseModel):
+    admin_photo_url: str
 
 # --- Schedule Schemas ---
 class ScheduleBase(BaseModel):

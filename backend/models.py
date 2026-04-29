@@ -33,14 +33,14 @@ class Complaint(Base):
     photo_url = Column(String) # proof from user
     
     # Status & Admin
-    status = Column(String, default="pending") # pending, solved
+    status = Column(String, default="pending") # pending, processed, rejected, solved
     admin_photo_url = Column(String, nullable=True) # Proof from admin
     priority_score = Column(Integer, default=0) # From our AI NLP 
     is_approved = Column(Boolean, default=False) # Approval from kelurahan user
     category = Column(String)
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    user_id = Column(Integer, ForeignKey("users.id"))
+    user_id = Column(Integer, ForeignKey("users.id")) # User that approved or rejected it
 
 class Schedule(Base):
     __tablename__ = "schedules"
