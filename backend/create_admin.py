@@ -2,11 +2,13 @@ from sqlalchemy.orm import Session
 from backend.database import SessionLocal, engine
 from backend import models
 from passlib.context import CryptContext
+import getpass
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def create_initial_admin():
     print("--- Setup Akun Admin Wallawe ---")
+    db = SessionLocal()
     username = input("Masukkan Username Admin: ")
     
     password = getpass.getpass("Masukkan Password Admin: ")

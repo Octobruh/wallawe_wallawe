@@ -5,7 +5,7 @@ from enum import Enum
 import re
 
 
-kelurahan_jogja = [
+list_kelurahan = [
     "Baciro", "Bausasran", "Bener", "Brontokusuman", "Bumijo", 
     "Cokrodiningratan", "Demangan", "Gedongkiwo", "Giwangan", "Gowongan", 
     "Gunungketur", "Kadipaten", "Karangwaru", "Keparakan", "Klitren", 
