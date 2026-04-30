@@ -22,16 +22,19 @@ _Note: It is recommended to run this inside a virtual environment._
 Please ensure you are running these commands from the root directory of this repository.
 
 1. Update Database
+
 If you want to update your database to the latest version, run:
 ```bash
 alembic upgrade head
 ```
 2.  Add a New User
+
 To create a new regular user in the system, run:
 ```bash
 python3 -m backend.create_user.py
 ```
 3.  Add a New Admin
+
 To create a new admin, run:
 ```bash
 python3 -m backend.create_admin.py
@@ -39,7 +42,7 @@ python3 -m backend.create_admin.py
 
 ## Environment Variables
 
-To make this repository work properly, you would need these variables:
+To make this repository work properly, you would need these variables in your .env file:
 1. DATABASE_URL
 2. SECRET_KEY
 3. ALGORITHM
