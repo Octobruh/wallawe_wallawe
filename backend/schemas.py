@@ -38,21 +38,29 @@ class StatusComplaint(str, Enum):
     REJECTED = "rejected"
     SOLVED = "solved"
 
+priority_map = {
+        "Tinggi": 3,
+        "Sedang": 2,
+        "Rendah": 1,
+        "Unknown": 0
+    }
+reverse_priority_map = {v: k for k, v in priority_map.items()}
 # --- User Schemas ---
 class UserBase(BaseModel):
     username: str
     role: str
-
-class UserCreate(UserBase):
-    password: str
-
+    
 class UserKelurahanResponse(BaseModel):
     kelurahan_name: str
     model_config = ConfigDict(from_attributes=True)
-    
+
 class User(UserBase):
     id: int
     accessible_kelurahans: List[UserKelurahanResponse] = []
+    model_config = ConfigDict(from_attributes=True)
+
+class Admin(UserBase):
+    id: int
     model_config = ConfigDict(from_attributes=True)
 
 # --- Complaint Schemas ---
@@ -64,21 +72,28 @@ class ComplaintBase(BaseModel):
     description_location: str
     complaint_text: str
 
-class ComplaintCreate(ComplaintBase):
-    pass
-
-class Complaint(ComplaintBase):
+# Schema for User / Public
+class ComplaintPublic(ComplaintBase):
     id: int
-    photo_url: str    
+    photo_url: str 
     status: StatusComplaint
-    admin_photo_url: Optional[str] = None
-    priority_score: int
-    is_approved: bool
     created_at: datetime
     solved_at: Optional[datetime] = None
-    approved_by: Optional[int] = None
-    
+    admin_photo_url: Optional[str] = None
     model_config = ConfigDict(from_attributes=True)
+
+# Schema for ADMIN ONLY
+class ComplaintAdmin(ComplaintPublic):
+    priority_score: Optional[str] = "Unknown"
+    category: Optional[str] = "Belum Dikategorikan"
+    approved_by: Optional[int] = None
+
+    @field_validator('priority_score', mode='before')
+    @classmethod
+    def convert_score_to_label(cls, v):
+        if isinstance(v, int):
+            return reverse_priority_map.get(v, "Unknown")
+        return v 
 
 class ComplaintStatusUpdate(BaseModel):
     is_approved: bool

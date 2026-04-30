@@ -2,13 +2,16 @@ from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, Form
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import List, Optional, Any
 from . import models, schemas, database, auth
 from sqlalchemy import case, desc
 import shutil
 import uuid
+import os
 from pathlib import Path
 from datetime import datetime
+from dotenv import load_dotenv
+import requests
 
 app = FastAPI(title="Wallawe API")
 
@@ -38,13 +41,16 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     access_token = auth.create_access_token(data={"sub": user.username, "role": user.role})
     return {"access_token": access_token, "token_type": "bearer"}
 
-@app.get("/users/me", response_model=schemas.User)
-def read_users_me(current_user: models.User = Depends(auth.get_current_user)):
-    return current_user
+@app.get("/users/me")
+def read_users_me(current_user: models.User = Depends(auth.get_current_user)) -> Any:
+    if current_user.role != "admin":
+        return schemas.User.model_validate(current_user)
+    else:
+        return schemas.Admin.model_validate(current_user)
 
 # --- Complaints Endpoints ---
 
-@app.post("/complaints/", response_model=schemas.Complaint)
+@app.post("/complaints/", response_model=schemas.ComplaintPublic)
 def create_complaint(
     # --- Text Input ---
     kelurahan: schemas.KelurahanJogja = Form(...),
@@ -56,7 +62,7 @@ def create_complaint(
     
     # --- File Input ---
     file: UploadFile = File(...),
-    
+
     db: Session = Depends(database.get_db)
 ):
     # 1. File Validation
@@ -73,8 +79,28 @@ def create_complaint(
             shutil.copyfileobj(file.file, buffer)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Gagal menyimpan foto: {str(e)}")
+    
+    # 3. Getting priority and case with AI NLP
+    ai_url = os.getenv("AI_MODEL_URL")
+    ai_payload = {"teks": complaint_text}
+    priority_score = 0
+    category = "Lainnya"
+ 
+    try:
+        response = requests.post(ai_url, json=ai_payload, timeout=10)
+        
+        if response.status_code == 200:
+            ai_data = response.json()
+            label_prioritas = ai_data["hasil_prediksi"]["prioritas"]["label"]
+            priority_score = schemas.priority_map.get(label_prioritas, 0)
+            category = ai_data["hasil_prediksi"]["kasus"]["kategori"]
+        else:
+            print(f"Warning: AI API returned status {response.status_code}")
+            
+    except requests.exceptions.RequestException as e:
+        print(f"Error menghubungi AI: {e}")
 
-    # 3. Saving to Database
+    # 4. Saving to Database
     new_complaint = models.Complaint(
         kelurahan=kelurahan.value, 
         rt=rt,
@@ -83,7 +109,9 @@ def create_complaint(
         description_location=description_location,
         complaint_text=complaint_text,
         photo_url=f"/static/complaints/{unique_filename}", 
-        status=schemas.StatusComplaint.PENDING.value
+        status=schemas.StatusComplaint.PENDING.value,
+        priority_score=priority_score,
+        category=category
     )
 
     db.add(new_complaint)
@@ -92,28 +120,34 @@ def create_complaint(
 
     return new_complaint
 
-@app.get("/complaints/", response_model=List[schemas.Complaint])
+@app.get("/complaints/")
 def read_complaints(
     kelurahan: Optional[schemas.KelurahanJogja] = None, 
     status: Optional[schemas.StatusComplaint] = None,
+    priority_score: Optional[str] = None,
     skip: int = 0, 
     limit: int = 100, 
-    db: Session = Depends(database.get_db)
-):
+    db: Session = Depends(database.get_db),
+    current_user: Optional[models.User] = Depends(auth.get_optional_user)
+) -> Any:
     query = db.query(models.Complaint)
-    # If they want to sort based on the kelurahan
     if kelurahan:
         query = query.filter(models.Complaint.kelurahan == kelurahan.value)
     if status:
         query = query.filter(models.Complaint.status == status.value)
+    if priority_score is not None and current_user and current_user.role == "admin":
+        query = query.filter(models.Complaint.priority_score == schemas.priority_map.get(priority_score, 0))
     complaints = query.order_by(desc(models.Complaint.created_at))\
         .offset(skip)\
         .limit(limit)\
         .all()
-    return complaints
+    if current_user and current_user.role == "admin":
+        return [schemas.ComplaintAdmin.model_validate(c) for c in complaints]
+    else:
+        return [schemas.ComplaintPublic.model_validate(c) for c in complaints]
 
 
-@app.patch("/complaints/assigned/{complaint_id}/status", response_model=schemas.Complaint)
+@app.patch("/complaints/assigned/{complaint_id}/status", response_model=schemas.ComplaintPublic)
 def update_complaint_status_kelurahan(
     complaint_id: int,
     status_update: schemas.ComplaintStatusUpdate,
@@ -144,7 +178,7 @@ def update_complaint_status_kelurahan(
     return db_complaint
 
 # Endpoint for user dashboard
-@app.get("/complaints/assigned", response_model=List[schemas.Complaint])
+@app.get("/complaints/assigned", response_model=List[schemas.ComplaintPublic])
 def read_assigned_complaints(
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(auth.get_current_user)
@@ -159,7 +193,7 @@ def read_assigned_complaints(
     
     return complaints
 
-@app.patch("/complaints/{complaint_id}/solve", response_model=schemas.Complaint)
+@app.patch("/complaints/{complaint_id}/solve", response_model=schemas.ComplaintAdmin)
 def solve_complaint(
     complaint_id: int,
     admin_photo: UploadFile = File(...), 
@@ -220,7 +254,7 @@ def read_schedules(day: Optional[schemas.NamaHari] = None, db: Session = Depends
 def add_schedule(
     schedule: schemas.ScheduleCreate, 
     db: Session = Depends(database.get_db),
-    current_user: models.User = Depends(auth.get_current_user) # Proteksi aktif
+    current_user: models.User = Depends(auth.get_current_user) 
 ):
     if current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Hanya admin yang bisa menambah jadwal")
