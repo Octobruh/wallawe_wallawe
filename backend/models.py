@@ -40,7 +40,8 @@ class Complaint(Base):
     category = Column(String)
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    user_id = Column(Integer, ForeignKey("users.id")) # User that approved or rejected it
+    solved_at = Column(DateTime(timezone=True), nullable=True)
+    approved_by = Column(Integer, ForeignKey("users.id")) # User that approved or rejected it
 
 class Schedule(Base):
     __tablename__ = "schedules"

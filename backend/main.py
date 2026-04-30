@@ -1,12 +1,26 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, Form
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from . import models, schemas, database, auth
 from sqlalchemy import case, desc
+import shutil
+import uuid
+from pathlib import Path
+from datetime import datetime
 
 app = FastAPI(title="Wallawe API")
 
+BASE_UPLOAD_DIR = Path("uploads")
+COMPLAINTS_DIR = BASE_UPLOAD_DIR / "complaints"
+SOLVED_DIR = BASE_UPLOAD_DIR / "solved"
+
+BASE_UPLOAD_DIR.mkdir(exist_ok=True)
+COMPLAINTS_DIR.mkdir(parents=True, exist_ok=True)
+SOLVED_DIR.mkdir(parents=True, exist_ok=True)
+
+app.mount("/static", StaticFiles(directory="uploads"), name="static")
 # Root endpoint
 @app.get("/")
 def read_root():
@@ -31,12 +45,52 @@ def read_users_me(current_user: models.User = Depends(auth.get_current_user)):
 # --- Complaints Endpoints ---
 
 @app.post("/complaints/", response_model=schemas.Complaint)
-def create_complaint(complaint: schemas.ComplaintCreate, db: Session = Depends(database.get_db)):
-    db_complaint = models.Complaint(**complaint.model_dump())
-    db.add(db_complaint)
+def create_complaint(
+    # --- Text Input ---
+    kelurahan: schemas.KelurahanJogja = Form(...),
+    rt: int = Form(...),
+    rw: int = Form(...),
+    jalan: str = Form(...),
+    description_location: str = Form(...),
+    complaint_text: str = Form(...),
+    
+    # --- File Input ---
+    file: UploadFile = File(...),
+    
+    db: Session = Depends(database.get_db)
+):
+    # 1. File Validation
+    if not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="File wajib berupa gambar (JPEG, PNG, dll)")
+
+    # 2. Saving File
+    file_extension = Path(file.filename).suffix
+    unique_filename = f"{uuid.uuid4()}{file_extension}" 
+    file_path = COMPLAINTS_DIR / unique_filename
+
+    try:
+        with file_path.open("wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Gagal menyimpan foto: {str(e)}")
+
+    # 3. Saving to Database
+    new_complaint = models.Complaint(
+        kelurahan=kelurahan.value, 
+        rt=rt,
+        rw=rw,
+        jalan=jalan,
+        description_location=description_location,
+        complaint_text=complaint_text,
+        photo_url=f"/static/complaints/{unique_filename}", 
+        status=schemas.StatusComplaint.PENDING.value
+    )
+
+    db.add(new_complaint)
     db.commit()
-    db.refresh(db_complaint)
-    return db_complaint
+    db.refresh(new_complaint)
+
+    return new_complaint
 
 @app.get("/complaints/", response_model=List[schemas.Complaint])
 def read_complaints(
@@ -83,29 +137,7 @@ def update_complaint_status_kelurahan(
 
     db_complaint.is_approved = status_update.is_approved
     db_complaint.status = status_update.status
-    db_complaint.user_id = current_user.id 
-
-    db.commit()
-    db.refresh(db_complaint)
-    return db_complaint
-
-@app.patch("/complaints/{complaint_id}/solve", response_model=schemas.Complaint)
-def solve_complaint(
-    complaint_id: int,
-    solve_data: schemas.ComplaintSolve,
-    db: Session = Depends(database.get_db),
-    current_user: models.User = Depends(auth.get_current_user)
-):
-    if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Hanya Admin yang dapat menyelesaikan laporan")
-
-    db_complaint = db.query(models.Complaint).filter(models.Complaint.id == complaint_id).first()
-    if not db_complaint:
-        raise HTTPException(status_code=404, detail="Laporan tidak ditemukan")
-
-    db_complaint.status = schemas.StatusComplaint.SOLVED
-    db_complaint.admin_photo_url = solve_data.admin_photo_url
-    db_complaint.user_id = current_user.id
+    db_complaint.approved_by = current_user.id
 
     db.commit()
     db.refresh(db_complaint)
@@ -126,6 +158,42 @@ def read_assigned_complaints(
     complaints = query.order_by(desc(models.Complaint.created_at)).all()
     
     return complaints
+
+@app.patch("/complaints/{complaint_id}/solve", response_model=schemas.Complaint)
+def solve_complaint(
+    complaint_id: int,
+    admin_photo: UploadFile = File(...), 
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Hanya Admin yang dapat menyelesaikan laporan")
+
+    db_complaint = db.query(models.Complaint).filter(models.Complaint.id == complaint_id).first()
+    if not db_complaint:
+        raise HTTPException(status_code=404, detail="Laporan tidak ditemukan")
+
+    if not admin_photo.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="File bukti wajib berupa gambar")
+
+    file_extension = Path(admin_photo.filename).suffix
+    unique_filename = f"solved_{uuid.uuid4()}{file_extension}" 
+    file_path = SOLVED_DIR / unique_filename
+
+    try:
+        with file_path.open("wb") as buffer:
+            shutil.copyfileobj(admin_photo.file, buffer)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Gagal menyimpan foto bukti: {str(e)}")
+
+    db_complaint.status = schemas.StatusComplaint.SOLVED
+    db_complaint.admin_photo_url = f"/static/solved/{unique_filename}" 
+    db_complaint.solved_at = datetime.now() 
+
+    db.commit()
+    db.refresh(db_complaint)
+    
+    return db_complaint
 
 # --- Schedules Endpoints ---
 

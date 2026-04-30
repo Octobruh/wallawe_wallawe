@@ -63,23 +63,22 @@ class ComplaintBase(BaseModel):
     jalan: str
     description_location: str
     complaint_text: str
-    photo_url: Optional[str] = None
-    status: StatusComplaint = StatusComplaint.PENDING
 
 class ComplaintCreate(ComplaintBase):
     pass
 
 class Complaint(ComplaintBase):
     id: int
-    status: str
+    photo_url: str    
+    status: StatusComplaint
     admin_photo_url: Optional[str] = None
     priority_score: int
     is_approved: bool
     created_at: datetime
-    user_id: Optional[int] = None
+    solved_at: Optional[datetime] = None
+    approved_by: Optional[int] = None
     
     model_config = ConfigDict(from_attributes=True)
-
 
 class ComplaintStatusUpdate(BaseModel):
     is_approved: bool
