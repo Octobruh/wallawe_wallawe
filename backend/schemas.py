@@ -49,7 +49,9 @@ reverse_priority_map = {v: k for k, v in priority_map.items()}
 class UserBase(BaseModel):
     username: str
     role: str
-    
+
+# Note: This class is needed since models.User.accessible_kelurahans use relational stuff so we need this temporary class   
+# So we can't just accessible_kelurahans: List[str] = []
 class UserKelurahanResponse(BaseModel):
     kelurahan_name: str
     model_config = ConfigDict(from_attributes=True)
