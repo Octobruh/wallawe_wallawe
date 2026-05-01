@@ -17,6 +17,18 @@ pip install -r requirements.txt
 ```
 _Note: It is recommended to run this inside a virtual environment._
 
+
+## Environment Variables
+
+To make this repository work properly, you would need these variables in your .env file:
+1. DATABASE_URL
+2. SECRET_KEY
+3. ALGORITHM
+4. ACCESS_TOKEN_EXPIRE_HOURS
+5. AI_MODEL_URL
+
+Inside the ```frontend``` folder, you also must put another .env file named NEXT_PUBLIC_API_URL
+
 ## Database & User Management
 
 Please ensure you are running these commands from the root directory of this repository.
@@ -40,11 +52,17 @@ To create a new admin, run:
 python3 -m backend.create_admin.py
 ```
 
-## Environment Variables
+4. To activate your own database, do as follow:
 
-To make this repository work properly, you would need these variables in your .env file:
-1. DATABASE_URL
-2. SECRET_KEY
-3. ALGORITHM
-4. ACCESS_TOKEN_EXPIRE_HOURS
-5. AI_MODEL_URL
+```bash
+sudo systemctl start postgresql
+uvicorn backend.main:app --reload
+```
+
+## Frontend
+
+To activate your own frontend environment:
+```bash
+cd frontend
+npm run dev
+```
