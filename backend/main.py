@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, Form
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import List, Optional, Any
 from . import models, schemas, database, auth
@@ -24,6 +25,19 @@ COMPLAINTS_DIR.mkdir(parents=True, exist_ok=True)
 SOLVED_DIR.mkdir(parents=True, exist_ok=True)
 
 app.mount("/static", StaticFiles(directory="uploads"), name="static")
+
+origins = [
+    "http://localhost:3000"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins, 
+    allow_credentials=True,
+    allow_methods=["*"],   
+    allow_headers=["*"],   
+)
+
 # Root endpoint
 @app.get("/")
 def read_root():
