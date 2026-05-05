@@ -216,49 +216,52 @@ export default function JadwalPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-[#F4F6F5] flex flex-col text-gray-900 p-10">
+      <div className="min-h-screen bg-[#F4F6F5] flex flex-col text-gray-900 px-4 py-6">
         <BlurFade inView>
 
         {/* HEADER & FILTER */}
-        <header className="max-w-6xl mx-auto w-full px-6 pt-12 pb-6">
-          <h1 className="text-3xl font-extrabold text-[#08503C] mb-2">Jadwal Truk Keliling</h1>
-          <p className="text-gray-600">Pantau jadwal pengambilan sampah. {user?.role === "admin" && <strong>Klik area kosong pada tabel untuk menambah jadwal.</strong>}</p>
-        </header>
+          <div className="max-w-6xl mx-auto w-full">
+            <header className="w-full pt-6 pb-6">
+              <h1 className="text-3xl font-extrabold text-[#08503C] mb-2">Jadwal Truk Keliling</h1>
+              <p className="text-gray-600">Pantau jadwal pengambilan sampah. {user?.role === "admin" && <strong>Klik area kosong pada tabel untuk menambah jadwal.</strong>}</p>
+            </header>
 
-        <div className="max-w-6xl mx-auto w-full mb-8 px-6 py-6 bg-white rounded-2xl border border-gray-200 shadow-sm flex gap-6 items-end">
-          <div className="flex flex-col gap-2 flex-1">
-            <label className="text-xs font-bold text-[#08503C] uppercase tracking-wide">Pilih Hari</label>
-            <select className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:border-[#08503C] focus:ring-2 focus:ring-[#08503C]/20" value={filterDay} onChange={(e) => setFilterDay(e.target.value)}>
-              <option value="">Semua Hari</option>
-              {days.map(d => <option key={d} value={d}>{d}</option>)}
-            </select>
-          </div>
-          <div className="flex flex-col gap-2 flex-1">
-            <label className="text-xs font-bold text-[#08503C] uppercase tracking-wide">Pilih Kelurahan</label>
-            <select className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:border-[#08503C] focus:ring-2 focus:ring-[#08503C]/20" value={filterKelurahan} onChange={(e) => setFilterKelurahan(e.target.value)}>
-              <option value="">Semua Kelurahan</option>
-              {list_kelurahan.map(k => <option key={k} value={k}>{k}</option>)}
-            </select>
-          </div>
-        </div>
+            <div className="mb-8 py-6 bg-white rounded-2xl border border-gray-200 shadow-sm">
+              <div className="px-6 flex gap-6 items-end flex-wrap">
+                <div className="flex flex-col gap-2 flex-1 min-w-[200px]">
+                  <label className="text-xs font-bold text-[#08503C] uppercase tracking-wide">Pilih Hari</label>
+                  <select className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:border-[#08503C] focus:ring-2 focus:ring-[#08503C]/20" value={filterDay} onChange={(e) => setFilterDay(e.target.value)}>
+                    <option value="">Semua Hari</option>
+                    {days.map(d => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                </div>
+                <div className="flex flex-col gap-2 flex-1 min-w-[200px]">
+                  <label className="text-xs font-bold text-[#08503C] uppercase tracking-wide">Pilih Kelurahan</label>
+                  <select className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:border-[#08503C] focus:ring-2 focus:ring-[#08503C]/20" value={filterKelurahan} onChange={(e) => setFilterKelurahan(e.target.value)}>
+                    <option value="">Semua Kelurahan</option>
+                    {list_kelurahan.map(k => <option key={k} value={k}>{k}</option>)}
+                  </select>
+                </div>
+              </div>
+            </div>
 
-        {/* TABEL MATRIX */}
-        <div className="max-w-6xl mx-auto w-full bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
+            {/* TABEL MATRIX */}
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-x-auto mb-10">
           {isLoadingSchedules ? (
             <div className="p-16 text-center text-[#08503C] font-bold">Memuat data jadwal...</div>
           ) : (
               <table className="w-full border-collapse text-left">
               <thead>
                 <tr>
-                    <th className="w-[120px] bg-gray-50 text-[#08503C] font-bold text-sm text-center">Jam Operasional</th>
-                    {visibleDays.map(day => <th key={day} className="bg-gray-50 text-[#08503C] font-bold text-sm text-center">{day}</th>)}
+                        <th className="w-[120px] bg-gray-50 text-[#08503C] font-bold text-sm text-center border-b border-r border-gray-200 p-3">Jam Operasional</th>
+                        {visibleDays.map(day => <th key={day} className="bg-gray-50 text-[#08503C] font-bold text-sm text-center border-b border-r border-gray-200 p-3">{day}</th>)}
                 </tr>
               </thead>
               <tbody>
                 {timeSlots.map(time => (
                   <tr key={time}>
-                    <td className="w-[120px] bg-gray-50 text-gray-700 text-sm font-bold text-center align-middle">
-                      <div className="min-h-[80px] flex items-center justify-center">
+                    <td className="w-[120px] bg-gray-50 text-gray-700 text-sm font-bold text-center align-middle border-b border-r border-gray-200">
+                      <div className="h-[100px] flex items-center justify-center">
                         {time}
                       </div>
                     </td>
@@ -267,7 +270,12 @@ export default function JadwalPage() {
                       return (
                         <td
                           key={`${day}-${time}`}
-                          className={`${user?.role === "admin" ? "wl-cell-admin" : ""} align-top`}
+                          className={`${user?.role === "admin" ? "wl-cell-admin" : ""} align-top border-b border-r border-gray-200 p-2`}
+                          style={{
+                            height: "100px",
+                            overflow: "hidden",
+                            verticalAlign: "top"
+                          }}
                           onClick={() => {
                             // Cek jika dia admin, buka modal tambah
                             if (user?.role === "admin") {
@@ -277,11 +285,17 @@ export default function JadwalPage() {
                           }}
                         >
                           {matchedSchedules.length > 0 ? (
-                            <div className="min-h-[80px] flex flex-col items-center justify-center gap-1">
+                            <div className="flex flex-col gap-1 overflow-hidden" style={{ maxHeight: "100%" }}>
                               {matchedSchedules.map(sch => (
                                 <div
                                   key={sch.id}
-                                  className={`w-full flex items-center justify-center bg-green-100 border border-green-300 text-[#08503C] px-2 py-1 rounded-md text-xs font-bold hover:bg-red-100 hover:text-red-700 transition${user?.role === "admin" ? " wl-jadwal-card-admin" : ""}`}
+                                  className={`flex items-center justify-center bg-green-100 border border-green-300 text-[#08503C] px-2 py-1 rounded-md text-xs font-bold hover:bg-red-100 hover:text-red-700 transition flex-shrink-0${user?.role === "admin" ? " wl-jadwal-card-admin" : ""}`}
+                                  style={{
+                                    minHeight: "32px",
+                                    cursor: "pointer",
+                                    whiteSpace: "normal",
+                                    wordBreak: "break-word"
+                                  }}
                                   onClick={(e) => {
                                     // Hentikan klik agar tidak memicu onClick sel tabel di belakangnya!
                                     e.stopPropagation();
@@ -297,7 +311,7 @@ export default function JadwalPage() {
                               ))}
                             </div>
                           ) : (
-                            <div className="min-h-[80px] text-gray-400 text-sm flex items-center justify-center">{user?.role === "admin" ? "+ Tambah" : "-"}</div>
+                              <div className="text-gray-400 text-sm flex items-center justify-center h-full">{user?.role === "admin" ? "+ Tambah" : "-"}</div>
                           )}
                         </td>
                       );
@@ -307,29 +321,30 @@ export default function JadwalPage() {
               </tbody>
             </table>
           )}
-        </div>
+            </div>
 
-        {/* AREA ADMIN: KELURAHAN BELUM TERJADWAL */}
-        {user?.role === "admin" && (
-          <div className="max-w-6xl mx-auto w-full mt-10 mb-16 bg-red-50 border border-red-300 rounded-2xl p-8 shadow-sm">
-            <h2 className="text-lg font-extrabold text-red-700 mb-2">Perhatian Admin</h2>
-            <p className="text-sm text-red-600 mb-6">Daftar kelurahan di bawah ini belum dimasukkan ke dalam jadwal operasional.</p>
-            {unscheduled.length > 0 ? (
-              <div className="wl-unscheduled-grid">
-                {unscheduled.map(kel => <span key={kel} className="bg-red-100 border border-red-200 text-red-700 px-3 py-1 rounded-full text-xs font-semibold">{kel}</span>)}
+            {/* AREA ADMIN: KELURAHAN BELUM TERJADWAL */}
+            {user?.role === "admin" && (
+              <div className="mt-10 bg-red-50 border border-red-300 rounded-2xl p-8 shadow-sm mb-10">
+                <h2 className="text-lg font-extrabold text-red-700 mb-2">Perhatian Admin</h2>
+                <p className="text-sm text-red-600 mb-6">Daftar kelurahan di bawah ini belum dimasukkan ke dalam jadwal operasional.</p>
+                {unscheduled.length > 0 ? (
+                  <div className="wl-unscheduled-grid">
+                    {unscheduled.map(kel => <span key={kel} className="bg-red-100 border border-red-200 text-red-700 px-3 py-1 rounded-full text-xs font-semibold">{kel}</span>)}
+                  </div>
+                ) : (
+                  <div style={{ color: "#059669", fontWeight: 600 }}>Semua kelurahan telah memiliki jadwal operasional!</div>
+                )}
               </div>
-            ) : (
-              <div style={{ color: "#059669", fontWeight: 600 }}>Semua kelurahan telah memiliki jadwal operasional!</div>
             )}
           </div>
-        )}
 
         {/* ======================= */}
         {/* MODAL TAMBAH JADWAL */}
         {/* ======================= */}
         {isAddModalOpen && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white w-full max-w-md rounded-2xl p-8 shadow-2xl">
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+              <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto">
               <h3 className="text-xl font-extrabold text-[#08503C] mb-6">Tambah Jadwal Baru</h3>
 
               <div style={{ marginBottom: "1rem", fontSize: "0.9rem", color: "#374553" }}>
@@ -366,9 +381,9 @@ export default function JadwalPage() {
         {/* MODAL HAPUS JADWAL */}
         {/* ======================= */}
         {isDeleteModalOpen && deleteTarget && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white w-full max-w-md rounded-2xl p-8 shadow-2xl">
-              <h3 className="text-xl font-extrabold text-[#08503C] mb-6" style={{ color: "#DC2626" }}>Hapus Jadwal?</h3>
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+              <div className="bg-white w-full max-w-md rounded-2xl p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
+                <h3 className="text-xl font-extrabold text-red-600 mb-6">Hapus Jadwal?</h3>
 
               <p style={{ fontSize: "0.95rem", color: "#374553", lineHeight: 1.5 }}>
                 Apakah Anda yakin ingin menghapus jadwal truk keliling untuk kelurahan <strong>{deleteTarget.kelurahan_target}</strong> pada hari <strong>{deleteTarget.day}</strong> pukul <strong>{deleteTarget.time}</strong>?

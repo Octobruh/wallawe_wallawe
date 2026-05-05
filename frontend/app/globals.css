@@ -128,3 +128,106 @@
     @apply font-sans;
   }
 }
+
+/* === WALLAWE CUSTOM STYLES === */
+
+/* Detail Modal - Image Box Styling */
+.wl-image-box {
+  @apply border-2 border-green-200 rounded-xl overflow-hidden bg-white;
+  background-size: cover;
+  background-position: center;
+}
+
+.wl-image-box img {
+  @apply w-full h-auto object-cover rounded-lg;
+  max-height: 400px;
+}
+
+.wl-image-label {
+  @apply text-xs font-bold px-3 py-2 bg-green-500 text-white uppercase tracking-wide;
+  background: #059669;
+}
+
+/* Detail Grid - Two Column Layout */
+.wl-detail-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-6;
+}
+
+/* Modal Styles */
+.wl-modal-close {
+  @apply text-gray-400 hover:text-gray-600 text-2xl font-light cursor-pointer transition;
+}
+
+/* Info Block Styling */
+.wl-info-block {
+  @apply mb-4;
+}
+
+.wl-info-label {
+  @apply text-xs font-bold text-gray-600 uppercase tracking-wide mb-2 block;
+  color: #08503C;
+}
+
+.wl-info-value {
+  @apply text-sm text-gray-700 font-medium;
+  color: #374151;
+  line-height: 1.6;
+}
+
+/* Badge Styles */
+.wl-badge {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold;
+}
+
+.wl-badge-pending {
+  @apply bg-yellow-100 text-yellow-700;
+}
+
+.wl-badge-process {
+  @apply bg-blue-100 text-blue-700;
+}
+
+.wl-badge-solved {
+  @apply bg-green-100 text-green-700;
+}
+
+.wl-badge-reject {
+  @apply bg-red-100 text-red-700;
+}
+
+/* Complaints Table Styles */
+.wl-row-title {
+  @apply block font-semibold text-gray-900;
+}
+
+.wl-row-desc {
+  @apply block text-xs text-gray-500 mt-1;
+}
+
+/* Schedule Table - Admin Cell Styles */
+.wl-cell-admin {
+  @apply cursor-pointer;
+  min-height: 90px;
+  padding: 8px;
+  position: relative;
+  overflow: visible !important;
+}
+
+.wl-cell-admin:hover {
+  @apply bg-green-50;
+}
+
+/* Schedule Card Styles */
+.wl-jadwal-card-admin {
+  @apply cursor-pointer transform hover:scale-105;
+  transition: all 0.2s ease;
+  white-space: normal;
+  word-break: break-word;
+  max-width: 100%;
+  min-width: 50px;
+}
+
+/* Unscheduled Grid */
+.wl-unscheduled-grid {
+  @apply flex flex-wrap gap-3;
+}

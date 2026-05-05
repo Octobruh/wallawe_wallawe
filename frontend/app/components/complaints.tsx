@@ -222,70 +222,73 @@ export default function PantauLaporanPage() {
     <>
 
 
-      <div className="min-h-screen bg-[#F4F6F5] flex flex-col text-gray-900">
+      <div className="min-h-screen bg-[#F4F6F5] flex flex-col text-gray-900 px-4 py-6">
         <BlurFade inView>
 
         {/* HEADER */}
-        <header className="max-w-6xl mx-auto w-full px-6 pt-12 pb-6">
-          <h1 className="text-3xl font-extrabold text-[#08503C] mb-2">Pantau Laporan Sampah</h1>
-          <p className="text-gray-600">Lihat progres penanganan sampah di Kota Yogyakarta secara transparan.</p>
-        </header>
+          <div className="max-w-6xl mx-auto w-full">
+            <header className="w-full pt-6 pb-6">
+              <h1 className="text-3xl font-extrabold text-[#08503C] mb-2">Pantau Laporan Sampah</h1>
+              <p className="text-gray-600">Lihat progres penanganan sampah di Kota Yogyakarta secara transparan.</p>
+            </header>
 
-        {/* FILTER BAR */}
-        <div className="max-w-6xl mx-auto w-full mb-8 px-6 py-6 bg-white rounded-2xl border border-gray-200 shadow-sm flex gap-6 items-end flex-wrap">
-          <div className="flex flex-col gap-2 flex-1 min-w-[200px]">
-            <label className="text-xs font-bold text-[#08503C] uppercase tracking-wide">Filter Kelurahan</label>
-            <select className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:border-[#08503C] focus:ring-2 focus:ring-[#08503C]/20" value={filterKelurahan} onChange={(e) => setFilterKelurahan(e.target.value)}>
-              <option value="">Semua Kelurahan</option>
-              {list_kelurahan.map(k => <option key={k} value={k}>{k}</option>)}
-            </select>
-          </div>
-          <div className="flex flex-col gap-2 flex-1 min-w-[200px]">
-            <label className="text-xs font-bold text-[#08503C] uppercase tracking-wide">Filter Status</label>
-            <select className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:border-[#08503C] focus:ring-2 focus:ring-[#08503C]/20" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
-              <option value="">Semua Status</option>
-              <option value="pending">Pending</option>
-              <option value="processed">Diproses</option>
-              <option value="solved">Selesai</option>
-              <option value="rejected">Ditolak</option>
-            </select>
-          </div>
-        </div>
+            {/* FILTER BAR */}
+            <div className="mb-8 py-6 bg-white rounded-2xl border border-gray-200 shadow-sm">
+              <div className="px-6 flex gap-6 items-end flex-wrap">
+                <div className="flex flex-col gap-2 flex-1 min-w-[200px]">
+                  <label className="text-xs font-bold text-[#08503C] uppercase tracking-wide">Filter Kelurahan</label>
+                  <select className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:border-[#08503C] focus:ring-2 focus:ring-[#08503C]/20" value={filterKelurahan} onChange={(e) => setFilterKelurahan(e.target.value)}>
+                    <option value="">Semua Kelurahan</option>
+                    {list_kelurahan.map(k => <option key={k} value={k}>{k}</option>)}
+                  </select>
+                </div>
+                <div className="flex flex-col gap-2 flex-1 min-w-[200px]">
+                  <label className="text-xs font-bold text-[#08503C] uppercase tracking-wide">Filter Status</label>
+                  <select className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:border-[#08503C] focus:ring-2 focus:ring-[#08503C]/20" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+                    <option value="">Semua Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="processed">Diproses</option>
+                    <option value="solved">Selesai</option>
+                    <option value="rejected">Ditolak</option>
+                  </select>
+                </div>
+              </div>
+            </div>
 
-        {/* TABEL DATA */}
-        <div className="max-w-6xl mx-auto w-full bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
-          {isLoading ? (
-            <div style={{ padding: "4rem", textAlign: "center", color: "#08503C", fontWeight: 700 }}>Memuat daftar laporan...</div>
-          ) : complaints.length === 0 ? (
-            <div style={{ padding: "4rem", textAlign: "center", color: "#8A9490" }}>Tidak ada laporan yang ditemukan dengan filter saat ini.</div>
-          ) : (
+            {/* TABEL DATA */}
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
+              {isLoading ? (
+                <div style={{ padding: "4rem", textAlign: "center", color: "#08503C", fontWeight: 700 }}>Memuat daftar laporan...</div>
+              ) : complaints.length === 0 ? (
+                <div style={{ padding: "4rem", textAlign: "center", color: "#8A9490" }}>Tidak ada laporan yang ditemukan dengan filter saat ini.</div>
+              ) : (
             <div style={{ overflowX: "auto" }}>
                   <table className="w-full border-collapse text-left">
                 <thead>
-                  <tr>
-                    <th>Waktu Laporan</th>
-                    <th>Lokasi Utama</th>
-                    <th>Status</th>
-                    {user?.role === "admin" && <th>Prioritas</th>}
-                    {user?.role === "admin" && <th>Kategori AI</th>}
-                    <th style={{ textAlign: "right" }}>Aksi</th>
+                          <tr className="border-b border-gray-200 bg-gray-50">
+                            <th className="px-6 py-4 font-semibold text-gray-700 text-sm">Waktu Laporan</th>
+                            <th className="px-6 py-4 font-semibold text-gray-700 text-sm">Lokasi Utama</th>
+                            <th className="px-6 py-4 font-semibold text-gray-700 text-sm">Status</th>
+                            {user?.role === "admin" && <th className="px-6 py-4 font-semibold text-gray-700 text-sm">Prioritas</th>}
+                            {user?.role === "admin" && <th className="px-6 py-4 font-semibold text-gray-700 text-sm">Kategori AI</th>}
+                            <th className="px-6 py-4 font-semibold text-gray-700 text-sm text-right">Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
                   {complaints.map((c) => (
-                    <tr key={c.id}>
-                      <td>
+                    <tr key={c.id} className="border-b border-gray-200 hover:bg-gray-50 transition">
+                      <td className="px-6 py-4">
                         <span className="wl-row-title">{new Date(c.created_at).toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                         <span className="wl-row-desc">{new Date(c.created_at).toLocaleTimeString("id-ID", { hour: '2-digit', minute: '2-digit' })} WIB</span>
                       </td>
-                      <td>
-                        <span className="wl-row-title">{c.kelurahan}</span>
-                        <span className="wl-row-desc">{c.jalan} (RT {c.rt}/RW {c.rw})</span>
+                      <td className="px-6 py-4">
+                        <span className="wl-row-title">{c.jalan}</span>
+                        <span className="wl-row-desc">{c.kelurahan} (RT {c.rt}/RW {c.rw})</span>
                       </td>
-                      <td>{getStatusBadge(c.status)}</td>
-                      {user?.role === "admin" && <td>{getPriorityBadge(c.priority_score)}</td>}
-                      {user?.role === "admin" && <td><span style={{ fontSize: "0.85rem", fontWeight: 600, background: "#F4F6F5", padding: "4px 8px", borderRadius: 6 }}>{c.category || "-"}</span></td>}
-                      <td style={{ textAlign: "right" }}>
+                      <td className="px-6 py-4">{getStatusBadge(c.status)}</td>
+                      {user?.role === "admin" && <td className="px-6 py-4">{getPriorityBadge(c.priority_score)}</td>}
+                      {user?.role === "admin" && <td className="px-6 py-4"><span style={{ fontSize: "0.85rem", fontWeight: 600, background: "#F4F6F5", padding: "4px 8px", borderRadius: 6 }}>{c.category || "-"}</span></td>}
+                      <td className="px-6 py-4 text-right">
                         <button
                           className="px-4 py-2 bg-[#08503C] text-white rounded-md text-sm font-semibold hover:bg-[#063B2C] transition"
                           onClick={() => {
@@ -303,18 +306,19 @@ export default function PantauLaporanPage() {
             </div>
           )}
         </div>
+          </div>
 
         {/* MODAL 1: DETAIL LAPORAN */}
         {isDetailModalOpen && selectedComplaint && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50" onClick={(e) => { if (e.target === e.currentTarget) setIsDetailModalOpen(false) }}>
-            <div className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={(e) => { if (e.target === e.currentTarget) setIsDetailModalOpen(false) }}>
+              <div className="bg-white w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
 
-              <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-                <h2>Detail Laporan #{selectedComplaint.id}</h2>
+                <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 flex-shrink-0">
+                  <h2 className="font-bold text-gray-900">Detail Laporan #{selectedComplaint.id}</h2>
                 <button className="wl-modal-close" onClick={() => setIsDetailModalOpen(false)}>×</button>
               </div>
 
-              <div className="p-6 flex flex-col gap-6 overflow-y-auto">
+                <div className="p-6 flex flex-col gap-6 overflow-y-auto flex-1">
                 <div className="wl-detail-grid">
                   <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                     <div className="wl-image-box">
@@ -343,7 +347,7 @@ export default function PantauLaporanPage() {
                     <div className="wl-info-block">
                       <div className="wl-info-label">Lokasi Lengkap</div>
                       <div className="wl-info-value">
-                        {selectedComplaint.jalan}, RT {selectedComplaint.rt}/RW {selectedComplaint.rw}, Kel. {selectedComplaint.kelurahan}<br />
+                          <strong>{selectedComplaint.jalan}</strong>, Kelurahan {selectedComplaint.kelurahan}, RT {selectedComplaint.rt}/RW {selectedComplaint.rw}<br />
                         <span style={{ color: "#8A9490", fontSize: "0.9rem", marginTop: 4, display: "inline-block" }}>
                           Patokan: {selectedComplaint.description_location}
                         </span>
@@ -400,17 +404,18 @@ export default function PantauLaporanPage() {
 
         {/* MODAL 2: KONFIRMASI AKSI */}
         {isActionModalOpen && selectedComplaint && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50" style={{ zIndex: 1000 }}>
-            <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl">
-              <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-                <h2>
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" style={{ zIndex: 1000 }}>
+              <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 flex-shrink-0">
+                  <h2 className="font-bold text-gray-900">
                   {actionType === "processed" ? "Konfirmasi Proses" :
                     actionType === "rejected" ? "Konfirmasi Penolakan" :
                       "Penyelesaian Laporan"}
                 </h2>
+                  <button className="wl-modal-close" onClick={() => { setIsActionModalOpen(false); setActionError(""); }}>×</button>
               </div>
 
-              <div className="p-6 flex flex-col gap-6 overflow-y-auto" style={{ padding: "1.5rem 2rem" }}>
+                <div className="p-6 flex flex-col gap-6 overflow-y-auto flex-1">
                 {actionError && <div style={{ color: "#DC2626", fontSize: "0.85rem", fontWeight: 700, marginBottom: "1rem" }}>{actionError}</div>}
 
                 {actionType === "processed" && <p>Anda akan mengubah status laporan ini menjadi <strong>Diproses</strong>. Pastikan petugas sudah diarahkan ke lokasi.</p>}
