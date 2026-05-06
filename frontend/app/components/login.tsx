@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { BlurFade } from "@/components/ui/blur-fade";
 
 export default function LoginPage() {
@@ -42,38 +41,25 @@ export default function LoginPage() {
 
   return (
     <>
-      <div className="min-h-screen flex flex-col bg-[#F4F6F5]">
-        <BlurFade inView>
-        {/* ── KONTEN DUA PANEL ──────────────────────────────────────── */}
-        <div className="flex flex-col md:flex-row flex-1 pt-16 min-h-screen">
-
-          {/* PANEL KIRI ─ Hijau solid */}
-          <div className="hidden md:flex relative w-[45%] bg-[#08503C] flex-col justify-center px-16 py-16 overflow-hidden">
-            {/* Elemen dekoratif */}
-            <div className="deco-circle-1" />
-            <div className="deco-circle-2" />
-            <div className="deco-circle-3" />
-
-            {/* Tulisan Wall-awe super besar */}
-            <div className="text-[clamp(3.5rem,6vw,5.5rem)] font-extrabold text-white leading-none mb-2 tracking-tight">
-              Wall-awe
-            </div>
-
-            {/* Judul yang diperbesar */}
-            <h1 className="text-[clamp(2.5rem,4vw,3.5rem)] font-bold text-white leading-tight mb-6 tracking-tight">
-              Sistem Keluhan<br />
-              <span style={{ color: "#5FD4AA" }}>Sampah</span> Terpadu
-            </h1>
-
-            {/* Deskripsi yang diperbesar */}
-            <p className="text-white/75 text-lg leading-relaxed max-w-md">
-              Masuk ke portal dasbor untuk mengelola, memantau, dan menyelesaikan pengaduan masyarakat di lingkungan Anda.
-            </p>
+      <div className="flex flex-col md:flex-row w-full min-h-[calc(100vh-64px)]">
+        <div className="hidden md:flex relative w-[45%] bg-[#08503C] flex-col justify-center px-16 py-16 overflow-hidden">
+          <div className="deco-circle-1" />
+          <div className="deco-circle-2" />
+          <div className="deco-circle-3" />
+          <div className="text-[clamp(3.5rem,6vw,5.5rem)] font-extrabold text-white leading-none mb-2 tracking-tight">
+            Wall-awe
           </div>
-
-          {/* PANEL KANAN ─ Off-white */}
-          <div className="flex-1 bg-[#F4F6F5] flex items-center justify-center px-6 py-12">
-            <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-11 border border-[#E8EDEB]">
+          <h1 className="text-[clamp(2.5rem,4vw,3.5rem)] font-bold text-white leading-tight mb-6 tracking-tight">
+            Sistem Keluhan<br />
+            <span style={{ color: "#5FD4AA" }}>Sampah</span> Terpadu
+          </h1>
+          <p className="text-white/75 text-lg leading-relaxed max-w-md">
+            Masuk ke portal dasbor untuk mengelola, memantau, dan menyelesaikan pengaduan masyarakat di lingkungan Anda.
+          </p>
+        </div>
+        <div className="flex-1 bg-[#F4F6F5] flex items-center justify-center px-6 py-12">
+          <BlurFade inView className="w-full max-w-md">
+            <div className="w-full bg-white rounded-2xl shadow-xl p-11 border border-[#E8EDEB]">
 
               {/* Header form */}
               <div className="mb-8">
@@ -99,7 +85,7 @@ export default function LoginPage() {
                     Username
                   </label>
                   <input
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:border-[#08503C] focus:ring-2 focus:ring-[#08503C]/20"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:border-[#08503C] focus:ring-2 focus:ring-[#08503C]/20 transition-all"
                     type="text"
                     value={username}
                     onChange={e => setUsername(e.target.value)}
@@ -114,7 +100,7 @@ export default function LoginPage() {
                     Password
                   </label>
                   <input
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:border-[#08503C] focus:ring-2 focus:ring-[#08503C]/20"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:border-[#08503C] focus:ring-2 focus:ring-[#08503C]/20 transition-all"
                     type="password"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
@@ -125,7 +111,7 @@ export default function LoginPage() {
 
                 {/* Tombol */}
                 <button
-                  className="mt-2 w-full py-3 bg-[#08503C] text-white font-bold text-sm rounded-lg flex justify-center items-center gap-2 disabled:opacity-70 hover:bg-[#063B2C] transition"
+                  className="mt-2 w-full py-3 bg-[#08503C] text-white font-bold text-sm rounded-lg flex justify-center items-center gap-2 disabled:opacity-70 hover:bg-[#063B2C] hover:-translate-y-[1px] transition-all"
                   type="submit"
                   disabled={isLoading}
                 >
@@ -148,14 +134,13 @@ export default function LoginPage() {
               {/* Footer info */}
               <p className="mt-7 text-center text-xs text-gray-400 leading-relaxed">
                 Ada pertanyaan? Hubungi{" "}
-                <a href="#" className="text-[#08503C] font-semibold no-underline">
+                <a href="#" className="text-[#08503C] font-semibold no-underline hover:underline">
                   tim teknis
                 </a>.
               </p>
             </div>
-          </div>
+          </BlurFade>
         </div>
-        </BlurFade>
       </div>
     </>
   );

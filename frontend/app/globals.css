@@ -1,233 +1,29 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
-}
-
-:root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
-
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
-}
-
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
   body {
-    @apply bg-background text-foreground;
-  }
-  html {
-    @apply font-sans;
+    @apply bg-[#F4F6F5] text-gray-900 flex flex-col min-h-screen;
+    font-family: var(--font-plus-jakarta), sans-serif;
   }
 }
 
-/* === WALLAWE CUSTOM STYLES === */
+@layer utilities {
+  .wl-modal-close {
+    @apply bg-transparent border-none text-2xl text-gray-400 cursor-pointer transition-colors hover:text-red-600;
+  }
 
-/* Detail Modal - Image Box Styling */
-.wl-image-box {
-  @apply border-2 border-green-200 rounded-xl overflow-hidden bg-white;
-  background-size: cover;
-  background-position: center;
-}
-
-.wl-image-box img {
-  @apply w-full h-auto object-cover rounded-lg;
-  max-height: 400px;
-}
-
-.wl-image-label {
-  @apply text-xs font-bold px-3 py-2 bg-green-500 text-white uppercase tracking-wide;
-  background: #059669;
-}
-
-/* Detail Grid - Two Column Layout */
-.wl-detail-grid {
-  @apply grid grid-cols-1 md:grid-cols-2 gap-6;
-}
-
-/* Modal Styles */
-.wl-modal-close {
-  @apply text-gray-400 hover:text-gray-600 text-2xl font-light cursor-pointer transition;
-}
-
-/* Info Block Styling */
-.wl-info-block {
-  @apply mb-4;
-}
-
-.wl-info-label {
-  @apply text-xs font-bold text-gray-600 uppercase tracking-wide mb-2 block;
-  color: #08503C;
-}
-
-.wl-info-value {
-  @apply text-sm text-gray-700 font-medium;
-  color: #374151;
-  line-height: 1.6;
-}
-
-/* Badge Styles */
-.wl-badge {
-  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold;
-}
-
-.wl-badge-pending {
-  @apply bg-yellow-100 text-yellow-700;
-}
-
-.wl-badge-process {
-  @apply bg-blue-100 text-blue-700;
-}
-
-.wl-badge-solved {
-  @apply bg-green-100 text-green-700;
-}
-
-.wl-badge-reject {
-  @apply bg-red-100 text-red-700;
-}
-
-/* Complaints Table Styles */
-.wl-row-title {
-  @apply block font-semibold text-gray-900;
-}
-
-.wl-row-desc {
-  @apply block text-xs text-gray-500 mt-1;
-}
-
-/* Schedule Table - Admin Cell Styles */
-.wl-cell-admin {
-  @apply cursor-pointer;
-  min-height: 90px;
-  padding: 8px;
-  position: relative;
-  overflow: visible !important;
-}
-
-.wl-cell-admin:hover {
-  @apply bg-green-50;
-}
-
-/* Schedule Card Styles */
-.wl-jadwal-card-admin {
-  @apply cursor-pointer transform hover:scale-105;
-  transition: all 0.2s ease;
-  white-space: normal;
-  word-break: break-word;
-  max-width: 100%;
-  min-width: 50px;
-}
-
-/* Unscheduled Grid */
-.wl-unscheduled-grid {
-  @apply flex flex-wrap gap-3;
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+    height: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #c5d1cd;
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
 }

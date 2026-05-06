@@ -163,11 +163,9 @@ export default function JadwalPage() {
 
       if (!res.ok) throw new Error("Gagal menambah jadwal. Pastikan Anda memiliki akses.");
 
-      // Jika sukses, refresh data tabel & list unscheduled
       await fetchSchedules();
       if (token) fetchUnscheduled(token);
 
-      // Tutup Modal
       setIsAddModalOpen(false);
       setNewKelurahan("");
     } catch (err: any) {
@@ -203,7 +201,6 @@ export default function JadwalPage() {
   };
 
   // --- Pembantu UI ---
-  const initials = user ? user.username.substring(0, 2).toUpperCase() : null;
   const visibleDays = filterDay ? [filterDay] : days;
 
   const getSchedulesForSlot = (day: string, time: string) => {
@@ -215,194 +212,184 @@ export default function JadwalPage() {
   };
 
   return (
-    <>
-      <div className="min-h-screen bg-[#F4F6F5] flex flex-col text-gray-900 px-4 py-6">
-        <BlurFade inView>
+    <div className="flex-1 w-full flex flex-col bg-[#F4F6F5] min-h-[calc(100vh-64px)] font-[Plus Jakarta Sans] text-gray-900 px-4 sm:px-8 py-8">
+      <BlurFade inView>
+        <div className="max-w-[1200px] mx-auto w-full">
 
-        {/* HEADER & FILTER */}
-          <div className="max-w-6xl mx-auto w-full">
-            <header className="w-full pt-6 pb-6">
-              <h1 className="text-3xl font-extrabold text-[#08503C] mb-2">Jadwal Truk Keliling</h1>
-              <p className="text-gray-600">Pantau jadwal pengambilan sampah. {user?.role === "admin" && <strong>Klik area kosong pada tabel untuk menambah jadwal.</strong>}</p>
-            </header>
+          {/* HEADER & FILTER */}
+          <header className="mb-8">
+            <h1 className="text-[2.25rem] font-extrabold text-[#08503C] tracking-tight mb-2">Jadwal Truk Keliling</h1>
+            <p className="text-[#374553] text-lg">Pantau jadwal pengambilan sampah. {user?.role === "admin" && <strong>Klik area kosong pada tabel untuk menambah jadwal.</strong>}</p>
+          </header>
 
-            <div className="mb-8 py-6 bg-white rounded-2xl border border-gray-200 shadow-sm">
-              <div className="px-6 flex gap-6 items-end flex-wrap">
-                <div className="flex flex-col gap-2 flex-1 min-w-[200px]">
-                  <label className="text-xs font-bold text-[#08503C] uppercase tracking-wide">Pilih Hari</label>
-                  <select className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:border-[#08503C] focus:ring-2 focus:ring-[#08503C]/20" value={filterDay} onChange={(e) => setFilterDay(e.target.value)}>
-                    <option value="">Semua Hari</option>
-                    {days.map(d => <option key={d} value={d}>{d}</option>)}
-                  </select>
-                </div>
-                <div className="flex flex-col gap-2 flex-1 min-w-[200px]">
-                  <label className="text-xs font-bold text-[#08503C] uppercase tracking-wide">Pilih Kelurahan</label>
-                  <select className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:border-[#08503C] focus:ring-2 focus:ring-[#08503C]/20" value={filterKelurahan} onChange={(e) => setFilterKelurahan(e.target.value)}>
-                    <option value="">Semua Kelurahan</option>
-                    {list_kelurahan.map(k => <option key={k} value={k}>{k}</option>)}
-                  </select>
-                </div>
-              </div>
+          <div className="bg-white rounded-2xl border border-[#E8EDEB] shadow-sm p-6 mb-10 flex flex-wrap gap-6 items-end">
+            <div className="flex flex-col gap-2 flex-1 min-w-[200px]">
+              <label className="text-xs font-bold text-[#08503C] uppercase tracking-wide">Pilih Hari</label>
+              <select className="w-full px-4 py-3 rounded-lg border-2 border-[#E0E7E4] bg-[#FAFBFA] text-[0.95rem] text-[#111] focus:outline-none focus:border-[#08503C] transition-colors cursor-pointer" value={filterDay} onChange={(e) => setFilterDay(e.target.value)}>
+                <option value="">Semua Hari</option>
+                {days.map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
             </div>
+            <div className="flex flex-col gap-2 flex-1 min-w-[200px]">
+              <label className="text-xs font-bold text-[#08503C] uppercase tracking-wide">Pilih Kelurahan</label>
+              <select className="w-full px-4 py-3 rounded-lg border-2 border-[#E0E7E4] bg-[#FAFBFA] text-[0.95rem] text-[#111] focus:outline-none focus:border-[#08503C] transition-colors cursor-pointer" value={filterKelurahan} onChange={(e) => setFilterKelurahan(e.target.value)}>
+                <option value="">Semua Kelurahan</option>
+                {list_kelurahan.map(k => <option key={k} value={k}>{k}</option>)}
+              </select>
+            </div>
+          </div>
 
-            {/* TABEL MATRIX */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-x-auto mb-10">
-          {isLoadingSchedules ? (
-            <div className="p-16 text-center text-[#08503C] font-bold">Memuat data jadwal...</div>
-          ) : (
-              <table className="w-full border-collapse text-left">
-              <thead>
-                <tr>
-                        <th className="w-[120px] bg-gray-50 text-[#08503C] font-bold text-sm text-center border-b border-r border-gray-200 p-3">Jam Operasional</th>
-                        {visibleDays.map(day => <th key={day} className="bg-gray-50 text-[#08503C] font-bold text-sm text-center border-b border-r border-gray-200 p-3">{day}</th>)}
-                </tr>
-              </thead>
-              <tbody>
-                {timeSlots.map(time => (
-                  <tr key={time}>
-                    <td className="w-[120px] bg-gray-50 text-gray-700 text-sm font-bold text-center align-middle border-b border-r border-gray-200">
-                      <div className="h-[100px] flex items-center justify-center">
-                        {time}
-                      </div>
-                    </td>
-                    {visibleDays.map(day => {
-                      const matchedSchedules = getSchedulesForSlot(day, time);
-                      return (
-                        <td
-                          key={`${day}-${time}`}
-                          className={`${user?.role === "admin" ? "wl-cell-admin" : ""} align-top border-b border-r border-gray-200 p-2`}
-                          style={{
-                            height: "100px",
-                            overflow: "hidden",
-                            verticalAlign: "top"
-                          }}
-                          onClick={() => {
-                            // Cek jika dia admin, buka modal tambah
-                            if (user?.role === "admin") {
-                              setAddSlotData({ day, time });
-                              setIsAddModalOpen(true);
-                            }
-                          }}
-                        >
-                          {matchedSchedules.length > 0 ? (
-                            <div className="flex flex-col gap-1 overflow-hidden" style={{ maxHeight: "100%" }}>
-                              {matchedSchedules.map(sch => (
-                                <div
-                                  key={sch.id}
-                                  className={`flex items-center justify-center bg-green-100 border border-green-300 text-[#08503C] px-2 py-1 rounded-md text-xs font-bold hover:bg-red-100 hover:text-red-700 transition flex-shrink-0${user?.role === "admin" ? " wl-jadwal-card-admin" : ""}`}
-                                  style={{
-                                    minHeight: "32px",
-                                    cursor: "pointer",
-                                    whiteSpace: "normal",
-                                    wordBreak: "break-word"
-                                  }}
-                                  onClick={(e) => {
-                                    // Hentikan klik agar tidak memicu onClick sel tabel di belakangnya!
-                                    e.stopPropagation();
-                                    if (user?.role === "admin") {
-                                      setDeleteTarget(sch);
-                                      setIsDeleteModalOpen(true);
-                                    }
-                                  }}
-                                  title={user?.role === "admin" ? "Klik untuk menghapus" : ""}
-                                >
-                                  {sch.kelurahan_target}
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                              <div className="text-gray-400 text-sm flex items-center justify-center h-full">{user?.role === "admin" ? "+ Tambah" : "-"}</div>
-                          )}
-                        </td>
-                      );
-                    })}
+          {/* TABEL MATRIX */}
+          <div className="bg-white rounded-2xl border border-[#E8EDEB] shadow-sm overflow-x-auto mb-10">
+            {isLoadingSchedules ? (
+              <div className="p-16 text-center text-[#08503C] font-bold text-lg">Memuat data jadwal...</div>
+            ) : (
+              <table className={`w-full border-collapse text-left ${visibleDays.length > 1 ? "min-w-[800px]" : "min-w-full"}`}>
+                <thead>
+                  <tr>
+                    <th className="w-[90px] sm:w-[120px] p-2 sm:p-4 bg-[#FAFBFA] text-[#08503C] font-bold text-[0.75rem] sm:text-[0.9rem] text-center border border-[#E8EDEB]">
+                      Jam Operasional
+                    </th>
+                    {visibleDays.map(day => (
+                      <th key={day} className="p-2 sm:p-4 bg-[#FAFBFA] text-[#08503C] font-bold text-[0.75rem] sm:text-[0.9rem] text-center border border-[#E8EDEB]">
+                        {day}
+                      </th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-            </div>
-
-            {/* AREA ADMIN: KELURAHAN BELUM TERJADWAL */}
-            {user?.role === "admin" && (
-              <div className="mt-10 bg-red-50 border border-red-300 rounded-2xl p-8 shadow-sm mb-10">
-                <h2 className="text-lg font-extrabold text-red-700 mb-2">Perhatian Admin</h2>
-                <p className="text-sm text-red-600 mb-6">Daftar kelurahan di bawah ini belum dimasukkan ke dalam jadwal operasional.</p>
-                {unscheduled.length > 0 ? (
-                  <div className="wl-unscheduled-grid">
-                    {unscheduled.map(kel => <span key={kel} className="bg-red-100 border border-red-200 text-red-700 px-3 py-1 rounded-full text-xs font-semibold">{kel}</span>)}
-                  </div>
-                ) : (
-                  <div style={{ color: "#059669", fontWeight: 600 }}>Semua kelurahan telah memiliki jadwal operasional!</div>
-                )}
-              </div>
+                </thead>
+                <tbody>
+                  {timeSlots.map(time => (
+                    <tr key={time}>
+                      <td className="w-[90px] sm:w-[120px] p-2 sm:p-4 bg-[#FAFBFA] text-[#374553] text-[0.7rem] sm:text-[0.85rem] font-bold text-center align-middle border border-[#E8EDEB]">
+                        {time}
+                      </td>
+                      {visibleDays.map(day => {
+                        const matchedSchedules = getSchedulesForSlot(day, time);
+                        return (
+                          <td
+                            key={`${day}-${time}`}
+                            className={`p-2 sm:p-3 border border-[#E8EDEB] align-top relative ${visibleDays.length > 1 ? "min-w-[140px]" : ""} h-[80px] sm:h-[100px] ${user?.role === "admin" ? "cursor-pointer hover:bg-[#E6F3EE] transition-colors" : ""}`}
+                            onClick={() => {
+                              if (user?.role === "admin") {
+                                setAddSlotData({ day, time });
+                                setIsAddModalOpen(true);
+                              }
+                            }}
+                          >
+                            {matchedSchedules.length > 0 ? (
+                              <div className="flex flex-col items-center gap-1.5 w-full h-full max-h-[120px] overflow-y-auto pr-1 custom-scrollbar">
+                                {matchedSchedules.map(sch => (
+                                  <div
+                                    key={sch.id}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      if (user?.role === "admin") {
+                                        setDeleteTarget(sch);
+                                        setIsDeleteModalOpen(true);
+                                      }
+                                    }}
+                                    title={user?.role === "admin" ? "Klik untuk menghapus" : ""}
+                                    className={`w-fit min-w-[110px] max-w-[95%] text-center bg-[#E6F3EE] border border-[#A7F3D0] text-[#08503C] px-2 py-1.5 rounded-md text-[0.7rem] sm:text-[0.8rem] font-bold shadow-sm transition-all ${user?.role === "admin" ? "hover:bg-[#FEE2E2] hover:text-[#B91C1C] hover:border-[#FCA5A5] hover:line-through" : ""}`}
+                                  >
+                                    {sch.kelurahan_target}
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className={`text-[#A0ABA6] text-[0.7rem] sm:text-[0.8rem] flex items-center justify-center h-full w-full pointer-events-none ${user?.role === "admin" ? "group-hover:text-[#08503C] group-hover:font-bold" : ""}`}>
+                                {user?.role === "admin" ? "+ Tambah" : "-"}
+                              </div>
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             )}
           </div>
 
-        {/* ======================= */}
-        {/* MODAL TAMBAH JADWAL */}
-        {/* ======================= */}
-        {isAddModalOpen && (
-            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-              <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto">
-              <h3 className="text-xl font-extrabold text-[#08503C] mb-6">Tambah Jadwal Baru</h3>
-
-              <div style={{ marginBottom: "1rem", fontSize: "0.9rem", color: "#374553" }}>
-                <strong>Hari:</strong> {addSlotData.day} <br />
-                <strong>Jam:</strong> {addSlotData.time}
-              </div>
-
-              {actionError && <div style={{ marginBottom: "1rem", color: "#DC2626", fontSize: "0.85rem", fontWeight: 600 }}>{actionError}</div>}
-
-              <form onSubmit={handleAddSchedule}>
-                <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.85rem", fontWeight: 700, color: "#08503C" }}>Pilih Kelurahan Target</label>
-                <select
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:border-[#08503C] focus:ring-2 focus:ring-[#08503C]/20"
-                  required
-                  value={newKelurahan}
-                  onChange={(e) => setNewKelurahan(e.target.value)}
-                >
-                  <option value="" disabled>-- Pilih Kelurahan --</option>
-                  {list_kelurahan.map(k => <option key={k} value={k}>{k}</option>)}
-                </select>
-
-                <div className="flex gap-4 mt-6">
-                  <button type="button" className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200" onClick={() => setIsAddModalOpen(false)}>Batal</button>
-                  <button type="submit" className="px-4 py-2 rounded-lg bg-[#08503C] text-white font-semibold hover:bg-[#063B2C]" disabled={actionLoading || !newKelurahan}>
-                    {actionLoading ? "Menyimpan..." : "Simpan"}
-                  </button>
+          {/* AREA ADMIN: KELURAHAN BELUM TERJADWAL */}
+          {user?.role === "admin" && (
+            <div className="bg-[#FFF4F4] border border-[#FCA5A5] rounded-2xl p-8 shadow-sm mb-10">
+              <h2 className="text-[1.25rem] font-extrabold text-[#B91C1C] mb-2 flex items-center gap-2">Perhatian Admin</h2>
+              <p className="text-[0.9rem] text-[#991B1B] mb-6">Daftar kelurahan di bawah ini belum dimasukkan ke dalam jadwal operasional.</p>
+              {unscheduled.length > 0 ? (
+                <div className="flex flex-wrap gap-2.5">
+                  {unscheduled.map(kel => <span key={kel} className="bg-[#FEF2F2] border border-[#FECACA] text-[#991B1B] px-3.5 py-1.5 rounded-full text-[0.85rem] font-semibold">{kel}</span>)}
                 </div>
-              </form>
+              ) : (
+                <div className="text-[#059669] font-semibold">Semua kelurahan telah memiliki jadwal operasional!</div>
+              )}
             </div>
-          </div>
-        )}
+          )}
 
-        {/* ======================= */}
-        {/* MODAL HAPUS JADWAL */}
-        {/* ======================= */}
-        {isDeleteModalOpen && deleteTarget && (
-            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-              <div className="bg-white w-full max-w-md rounded-2xl p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
-                <h3 className="text-xl font-extrabold text-red-600 mb-6">Hapus Jadwal?</h3>
+        </div>
+      </BlurFade>
 
-              <p style={{ fontSize: "0.95rem", color: "#374553", lineHeight: 1.5 }}>
-                Apakah Anda yakin ingin menghapus jadwal truk keliling untuk kelurahan <strong>{deleteTarget.kelurahan_target}</strong> pada hari <strong>{deleteTarget.day}</strong> pukul <strong>{deleteTarget.time}</strong>?
-              </p>
+      {/* ======================= */}
+      {/* MODAL TAMBAH JADWAL */}
+      {/* ======================= */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white w-full max-w-[420px] rounded-2xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto animate-[dropIn_0.2s_ease-out]">
+            <h3 className="text-[1.35rem] font-extrabold text-[#08503C] mb-6">Tambah Jadwal Baru</h3>
 
-              {actionError && <div style={{ marginTop: "1rem", color: "#DC2626", fontSize: "0.85rem", fontWeight: 600 }}>{actionError}</div>}
+            <div className="mb-4 text-[0.9rem] text-[#374553]">
+              <strong>Hari:</strong> {addSlotData.day} <br />
+              <strong>Jam:</strong> {addSlotData.time}
+            </div>
 
-              <div className="flex gap-4 mt-6">
-                <button type="button" className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200" onClick={() => setIsDeleteModalOpen(false)}>Batal</button>
-                <button type="button" className="px-4 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700" onClick={handleDeleteSchedule} disabled={actionLoading}>
-                  {actionLoading ? "Menghapus..." : "Ya, Hapus"}
+            {actionError && <div className="mb-4 text-[#DC2626] text-[0.85rem] font-semibold">{actionError}</div>}
+
+            <form onSubmit={handleAddSchedule}>
+              <label className="block mb-2 text-[0.85rem] font-bold text-[#08503C]">Pilih Kelurahan Target</label>
+              <select
+                className="w-full px-4 py-3 bg-[#FAFBFA] border-2 border-[#E0E7E4] rounded-xl text-[0.95rem] text-[#111] focus:outline-none focus:border-[#08503C] transition-colors cursor-pointer"
+                required
+                value={newKelurahan}
+                onChange={(e) => setNewKelurahan(e.target.value)}
+              >
+                <option value="" disabled>-- Pilih Kelurahan --</option>
+                {list_kelurahan.map(k => <option key={k} value={k}>{k}</option>)}
+              </select>
+
+              <div className="flex gap-4 mt-8">
+                <button type="button" className="flex-1 py-3 rounded-xl bg-[#F4F6F5] text-[#374553] font-bold hover:bg-[#E8EDEB] transition-colors" onClick={() => setIsAddModalOpen(false)}>Batal</button>
+                <button type="submit" className="flex-1 py-3 rounded-xl bg-[#08503C] text-white font-bold hover:bg-[#063B2C] transition-colors disabled:opacity-60 disabled:cursor-not-allowed" disabled={actionLoading || !newKelurahan}>
+                  {actionLoading ? "Menyimpan..." : "Simpan"}
                 </button>
               </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ======================= */}
+      {/* MODAL HAPUS JADWAL */}
+      {/* ======================= */}
+      {isDeleteModalOpen && deleteTarget && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white w-full max-w-[420px] rounded-2xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto animate-[dropIn_0.2s_ease-out]">
+            <h3 className="text-[1.35rem] font-extrabold text-[#DC2626] mb-6">Hapus Jadwal?</h3>
+
+            <p className="text-[0.95rem] text-[#374553] leading-relaxed">
+              Apakah Anda yakin ingin menghapus jadwal truk keliling untuk kelurahan <strong>{deleteTarget.kelurahan_target}</strong> pada hari <strong>{deleteTarget.day}</strong> pukul <strong>{deleteTarget.time}</strong>?
+            </p>
+
+            {actionError && <div className="mt-4 text-[#DC2626] text-[0.85rem] font-semibold">{actionError}</div>}
+
+            <div className="flex gap-4 mt-8">
+              <button type="button" className="flex-1 py-3 rounded-xl bg-[#F4F6F5] text-[#374553] font-bold hover:bg-[#E8EDEB] transition-colors" onClick={() => setIsDeleteModalOpen(false)}>Batal</button>
+              <button type="button" className="flex-1 py-3 rounded-xl bg-[#DC2626] text-white font-bold hover:bg-[#B91C1C] transition-colors disabled:opacity-60 disabled:cursor-not-allowed" onClick={handleDeleteSchedule} disabled={actionLoading}>
+                {actionLoading ? "Menghapus..." : "Ya, Hapus"}
+              </button>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        </BlurFade>
-      </div>
-    </>
+    </div>
   );
 }
