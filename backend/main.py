@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import List, Optional, Any
-from . import models, schemas, database, auth
+from backend import models, schemas, database, authz
 from sqlalchemy import case, desc
 import shutil
 import uuid
@@ -27,7 +27,8 @@ SOLVED_DIR.mkdir(parents=True, exist_ok=True)
 app.mount("/static", StaticFiles(directory="uploads"), name="static")
 
 origins = [
-    "http://localhost:3000"
+    "http://localhost:3000",
+    "https://wallawe-frontend.vercel.app"
 ]
 
 app.add_middleware(
