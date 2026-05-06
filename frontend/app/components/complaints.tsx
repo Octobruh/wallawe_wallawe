@@ -401,13 +401,13 @@ export default function PantauLaporanPage() {
                   <div className="flex flex-col gap-6">
                     <div className="rounded-xl overflow-hidden border border-gray-200 bg-gray-50 shadow-sm">
                       <div className="p-2 text-center text-[0.75rem] font-bold bg-[#08503C] text-white uppercase tracking-wider">Foto Saat Dilaporkan</div>
-                      <img className="w-full h-[250px] object-cover block" src={`${process.env.NEXT_PUBLIC_API_URL}${selectedComplaint.photo_url}`} alt="Bukti Pelapor" />
+                      <img className="w-full h-[250px] object-cover block" src={selectedComplaint.photo_url.startsWith('http') ? selectedComplaint.photo_url : `${process.env.NEXT_PUBLIC_API_URL}${selectedComplaint.photo_url}`} alt="Bukti Pelapor" />
                     </div>
 
                     {selectedComplaint.status === "solved" && selectedComplaint.admin_photo_url && (
                       <div className="rounded-xl overflow-hidden border-2 border-green-200 bg-green-50 shadow-sm">
                         <div className="p-2 text-center text-[0.75rem] font-bold bg-green-600 text-white uppercase tracking-wider">Foto Penyelesaian</div>
-                        <img className="w-full h-[250px] object-cover block" src={`${process.env.NEXT_PUBLIC_API_URL}${selectedComplaint.admin_photo_url}`} alt="Bukti Selesai" />
+                        <img className="w-full h-[250px] object-cover block" src={selectedComplaint.admin_photo_url.startsWith('http') ? selectedComplaint.admin_photo_url : `${process.env.NEXT_PUBLIC_API_URL}${selectedComplaint.admin_photo_url}`} alt="Bukti Selesai" />
                       </div>
                     )}
                   </div>
