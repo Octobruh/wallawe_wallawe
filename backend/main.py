@@ -1,34 +1,34 @@
 from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, Form
 from fastapi.security import OAuth2PasswordRequestForm
-from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import List, Optional, Any
-from backend import models, schemas, database, authz
+from backend import models, schemas, database, auth
 from sqlalchemy import case, desc
-import shutil
 import uuid
 import os
 from pathlib import Path
 from datetime import datetime
 from dotenv import load_dotenv
 import requests
+from supabase import create_client, Client
+
+load_dotenv()
 
 app = FastAPI(title="Wallawe API")
 
-BASE_UPLOAD_DIR = Path("uploads")
-COMPLAINTS_DIR = BASE_UPLOAD_DIR / "complaints"
-SOLVED_DIR = BASE_UPLOAD_DIR / "solved"
+# --- Inisialisasi Supabase Client ---
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
-BASE_UPLOAD_DIR.mkdir(exist_ok=True)
-COMPLAINTS_DIR.mkdir(parents=True, exist_ok=True)
-SOLVED_DIR.mkdir(parents=True, exist_ok=True)
+if not SUPABASE_URL or not SUPABASE_KEY:
+    print("Warning: SUPABASE_URL atau SUPABASE_KEY belum disetel di Environment Variables")
 
-app.mount("/static", StaticFiles(directory="uploads"), name="static")
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY) if SUPABASE_URL and SUPABASE_KEY else None
 
 origins = [
     "http://localhost:3000",
-    "https://wallawe-frontend.vercel.app"
+    "https://wallawe.vercel.app"
 ]
 
 app.add_middleware(
@@ -45,7 +45,6 @@ def read_root():
     return {"message": "Welcome to Wallawe API"}
 
 # Login endpoint
-
 @app.post("/token")
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
     user = db.query(models.User).filter(models.User.username == form_data.username).first()
@@ -84,16 +83,24 @@ def create_complaint(
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="File wajib berupa gambar (JPEG, PNG, dll)")
 
-    # 2. Saving File
+    if not supabase:
+        raise HTTPException(status_code=500, detail="Konfigurasi Supabase Storage belum tersedia")
+
+    # 2. Uploading File to Supabase Storage
     file_extension = Path(file.filename).suffix
     unique_filename = f"{uuid.uuid4()}{file_extension}" 
-    file_path = COMPLAINTS_DIR / unique_filename
+    file_path_in_storage = f"complaints/{unique_filename}"
 
     try:
-        with file_path.open("wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+        file_bytes = file.file.read()
+        supabase.storage.from_("wallawe-storage").upload(
+            file=file_bytes,
+            path=file_path_in_storage,
+            file_options={"content-type": file.content_type}
+        )
+        public_url = supabase.storage.from_("wallawe-storage").get_public_url(file_path_in_storage)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Gagal menyimpan foto: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Gagal mengunggah foto ke Storage: {str(e)}")
     
     # 3. Getting priority and case with AI NLP
     ai_url = os.getenv("AI_MODEL_URL")
@@ -123,7 +130,7 @@ def create_complaint(
         jalan=jalan,
         description_location=description_location,
         complaint_text=complaint_text,
-        photo_url=f"/static/complaints/{unique_filename}", 
+        photo_url=public_url, # URL langsung dari Supabase
         status=schemas.StatusComplaint.PENDING.value,
         priority_score=priority_score,
         category=category
@@ -160,7 +167,6 @@ def read_complaints(
         return [schemas.ComplaintAdmin.model_validate(c) for c in complaints]
     else:
         return [schemas.ComplaintPublic.model_validate(c) for c in complaints]
-
 
 @app.patch("/complaints/assigned/{complaint_id}/status", response_model=schemas.ComplaintPublic)
 def update_complaint_status_kelurahan(
@@ -225,18 +231,26 @@ def solve_complaint(
     if not admin_photo.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="File bukti wajib berupa gambar")
 
+    if not supabase:
+        raise HTTPException(status_code=500, detail="Konfigurasi Supabase Storage belum tersedia")
+
     file_extension = Path(admin_photo.filename).suffix
     unique_filename = f"solved_{uuid.uuid4()}{file_extension}" 
-    file_path = SOLVED_DIR / unique_filename
+    file_path_in_storage = f"solved/{unique_filename}"
 
     try:
-        with file_path.open("wb") as buffer:
-            shutil.copyfileobj(admin_photo.file, buffer)
+        file_bytes = admin_photo.file.read()
+        supabase.storage.from_("wallawe-storage").upload(
+            file=file_bytes,
+            path=file_path_in_storage,
+            file_options={"content-type": admin_photo.content_type}
+        )
+        public_url = supabase.storage.from_("wallawe-storage").get_public_url(file_path_in_storage)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Gagal menyimpan foto bukti: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Gagal mengunggah foto bukti ke Storage: {str(e)}")
 
     db_complaint.status = schemas.StatusComplaint.SOLVED
-    db_complaint.admin_photo_url = f"/static/solved/{unique_filename}" 
+    db_complaint.admin_photo_url = public_url # URL langsung dari Supabase
     db_complaint.solved_at = datetime.now() 
 
     db.commit()
