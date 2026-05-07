@@ -1,6 +1,6 @@
 # Wallawe
 
-Wallawe adalah platform pengaduan dan pengelolaan masalah sampah untuk wilayah Kota Yogyakarta yang dapat diakses di [sini](https://wallawe.vercel.app). Aplikasi ini terdiri dari frontend Next.js dan backend FastAPI, dengan dukungan autentikasi, pengelolaan laporan, jadwal pengambilan sampah, unggah bukti foto, serta klasifikasi prioritas laporan melalui layanan AI eksternal.
+Wallawe adalah platform pengaduan dan pengelolaan masalah sampah untuk wilayah Kota Yogyakarta yang dapat diakses di [sini](https://wallawe.vercel.app). Aplikasi ini terdiri dari frontend Next.js dan backend FastAPI, dengan dukungan autentikasi, pengelolaan laporan, jadwal pengambilan sampah, unggah bukti foto ke Supabase Storage, serta klasifikasi prioritas laporan melalui layanan AI eksternal.
 
 ## Fitur Utama
 
@@ -25,6 +25,7 @@ Wallawe adalah platform pengaduan dan pengelolaan masalah sampah untuk wilayah K
 - Pydantic
 - JWT authentication
 - Passlib bcrypt
+- Supabase Storage
 
 ### Frontend
 
@@ -67,6 +68,7 @@ Pastikan sudah menginstal:
 - Node.js 20 atau lebih baru
 - npm
 - PostgreSQL
+- Akun Supabase dengan bucket storage yang sudah dikonfigurasi
 
 ## Environment Variables
 
@@ -79,6 +81,8 @@ DATABASE_URL=postgresql://username:password@localhost:5432/wallawe
 SECRET_KEY=change-this-secret-key
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_HOURS=24
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_KEY=your-supabase-anon-key
 AI_MODEL_URL=http://localhost:8001/predict
 ```
 
@@ -88,6 +92,8 @@ Keterangan:
 - `SECRET_KEY`: secret untuk menandatangani JWT.
 - `ALGORITHM`: algoritma JWT, contoh `HS256`.
 - `ACCESS_TOKEN_EXPIRE_HOURS`: durasi masa aktif token login dalam jam.
+- `SUPABASE_URL`: URL project Supabase untuk penyimpanan foto laporan dan foto bukti selesai.
+- `SUPABASE_KEY`: anon key dari project Supabase.
 - `AI_MODEL_URL`: endpoint layanan AI yang menerima payload `{"teks": "isi laporan"}`.
 
 ### Frontend
@@ -149,8 +155,6 @@ Dokumentasi API otomatis tersedia di:
 ```text
 http://localhost:8000/docs
 ```
-
-File yang diunggah akan disimpan ke folder `uploads/` dan dilayani melalui path `/static`.
 
 ## Membuat Akun
 
@@ -306,8 +310,9 @@ Periksa:
 
 Periksa:
 
-- File yang diunggah adalah gambar.
-- Folder `uploads/` dapat dibuat dan ditulis oleh proses backend.
+- File yang diunggah adalah gambar (JPEG, PNG, atau format gambar lainnya).
+- `SUPABASE_URL` dan `SUPABASE_KEY` sudah tersedia di `.env` dan nilainya benar.
+- Bucket `wallawe-storage` sudah dibuat di project Supabase dan izin aksesnya sudah dikonfigurasi.
 
 ## Catatan Integrasi AI
 
